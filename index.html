@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Full Stack with DSA Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* slate-900 */
+        }
+        .checkbox-custom:focus + div {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        .checkbox-custom:checked + div {
+            background-color: #3b82f6; /* blue-500 */
+            border-color: #3b82f6;
+        }
+        .checkbox-custom:checked + div svg {
+            display: block;
+        }
+        .chapter-card {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="text-slate-200 antialiased p-4 md:p-8 min-h-screen">
+
+    <div class="max-w-6xl mx-auto bg-slate-800 rounded-2xl shadow-2xl overflow-hidden mb-10 border border-slate-700">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-slate-900 to-indigo-950 p-6 md:p-10 text-white border-b border-slate-700">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold mb-2 tracking-tight">Java Full Stack with DSA</h1>
+                    <p class="text-indigo-300 text-lg font-medium">Syllabus & Deployment Tracker</p>
+                </div>
+                
+                <div class="w-full md:w-1/3 bg-slate-900/60 p-4 rounded-xl backdrop-blur-md border border-slate-700 shadow-inner">
+                    <div class="flex justify-between text-sm mb-2 font-medium text-slate-300">
+                        <span>Overall Progress</span>
+                        <span id="overall-percentage" class="font-bold text-lg text-white">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
+                        <div id="overall-progress-bar" class="bg-gradient-to-r from-blue-500 to-indigo-400 h-full rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 md:px-10 bg-slate-900/30 border-b border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <p class="text-slate-400 text-sm">Track your progress across all subtopics and deployment platforms. Saved locally.</p>
+            <button onclick="resetProgress()" class="text-sm px-4 py-2 bg-slate-800 border border-slate-600 text-slate-300 rounded-lg hover:bg-slate-700 hover:text-red-400 hover:border-red-900/50 transition-colors font-medium shadow-sm flex-shrink-0">Reset Progress</button>
+        </div>
+
+        <!-- Content -->
+        <div id="syllabus-container" class="p-6 md:p-10 grid grid-cols-1 gap-10">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+
+    <script>
+        const syllabusData = [
+            {
+                category: "HTML & CSS",
+                topics: [
+                    { name: "HTML Basics & Structure", subtopics: ["Introduction to HTML", "HTML vs HTML5", "Lists", "Tables"] },
+                    { name: "Text & Media", subtopics: ["Headings & Paragraphs", "Formatting Tags", "Anchor Links", "Images, Audio & Video", "Iframes"] },
+                    { name: "Forms & Semantics", subtopics: ["Form Elements", "Input Types & Validations", "Div & Span", "Id & Class Attributes"] },
+                    { name: "CSS Basics & Selectors", subtopics: ["Intro to CSS", "Inline, Internal, External", "CSS Selectors", "Colors & Typography"] },
+                    { name: "Box Model & Layout", subtopics: ["Border, Padding, Margin", "Height & Width", "Display (none, inline, block)", "Position & Z-index"] },
+                    { name: "Modern CSS", subtopics: ["Flexbox", "CSS Grid", "Media Queries (Responsive)"] }
+                ]
+            },
+            {
+                category: "JavaScript & TypeScript",
+                topics: [
+                    { name: "Core JavaScript", subtopics: ["Variables (var, let, const)", "Data Types", "Operators", "Strings & Array Methods", "Dates and Time"] },
+                    { name: "Control Flow", subtopics: ["If/Else, Switch Case", "For, While, Do-While loops", "For-in, For-of"] },
+                    { name: "Functions & Scope", subtopics: ["Declarations & Expressions", "Arrow Functions", "IIFE", "Scope & Closures", "Function Currying"] },
+                    { name: "Object Oriented JS", subtopics: ["Objects (literal, keys, methods)", "Prototypes & Inheritance", "Getter/Setter", "Set & Map, WeakMap & WeakSet"] },
+                    { name: "Advanced Concepts", subtopics: ["Global Execution Context", "Hoisting", "Strict Mode", "Event Loop"] },
+                    { name: "DOM & Browser", subtopics: ["DOM & BOM Manipulation", "Event Handling", "Event Bubbling & Capturing"] },
+                    { name: "Asynchronous JS", subtopics: ["Callbacks & Callback Hell", "Promises", "Async / Await", "Fetch API", "AJAX & JSON"] },
+                    { name: "TypeScript", subtopics: ["Why TypeScript?", "Basic Types", "Interfaces & Classes", "Modules & Tooling"] }
+                ]
+            },
+            {
+                category: "React.js & Next.js",
+                topics: [
+                    { name: "React Core", subtopics: ["Virtual DOM & SPA", "JSX/TSX", "Functional & Class Components", "Props & State", "Event Handling", "Conditional Rendering & Lists"] },
+                    { name: "React Hooks", subtopics: ["useState & useEffect", "useRef & useReducer", "useContext", "Custom Hooks"] },
+                    { name: "Routing & Forms", subtopics: ["React Router Setup", "Dynamic & Nested Routes", "Controlled Components", "Form Validations"] },
+                    { name: "State Management", subtopics: ["Context API", "Redux (Store, Reducer, Actions)", "Redux Toolkit", "Async Actions (Thunk/Saga)"] },
+                    { name: "API & Styling", subtopics: ["Axios vs Fetch", "Material UI / PrimeNG", "Tailwind in React"] },
+                    { name: "Next.js Fundamentals", subtopics: ["Next.js Routing", "Server-Side Rendering (SSR)", "Static Site Generation (SSG)", "Client-side vs Server-side"] },
+                    { name: "Advanced Next.js", subtopics: ["API Routes", "NextAuth.js", "Image & Font Optimization"] }
+                ]
+            },
+            {
+                category: "Java Programming",
+                topics: [
+                    { name: "Fundamentals", subtopics: ["JVM, JRE, JDK", "Data Types & Variables", "Operators & Control Statements", "Type Casting"] },
+                    { name: "OOP Concepts", subtopics: ["Classes & Objects", "Constructors & 'this'", "Inheritance & 'super'", "Polymorphism", "Abstract Classes & Interfaces", "Encapsulation"] },
+                    { name: "Exception Handling", subtopics: ["Try, Catch, Finally", "Throw & Throws", "Custom Exceptions", "Checked vs Unchecked"] },
+                    { name: "Strings & Multithreading", subtopics: ["String, StringBuilder, StringBuffer", "Thread Lifecycle", "Synchronization", "Deadlocks", "Inter-thread Communication"] },
+                    { name: "Collections Framework", subtopics: ["List (ArrayList, LinkedList)", "Set (HashSet, TreeSet)", "Map (HashMap, TreeMap)", "Queue & Deque", "Iterators & Comparators"] },
+                    { name: "Advanced Java", subtopics: ["File I/O Streams", "Serialization", "Generics", "Java 8 Features (Lambdas, Streams)", "Date & Time API", "Reflection API", "Socket Programming"] }
+                ]
+            },
+            {
+                category: "Data Structures & Algorithms",
+                topics: [
+                    { name: "Basic Structures", subtopics: ["1D & 2D Arrays", "Linked Lists", "Stacks & Applications", "Queues (Circular, Priority)"] },
+                    { name: "Trees & Graphs", subtopics: ["Binary Trees & BST", "Tree Traversals", "Graph Representation", "BFS & DFS", "Shortest Path (Dijkstra)"] },
+                    { name: "Algorithms", subtopics: ["Sorting (Bubble, Selection, Insertion, Merge, Quick)", "Searching (Linear, Binary)", "Hashing & Hash Tables"] }
+                ]
+            },
+            {
+                category: "Databases & Java EE",
+                topics: [
+                    { name: "SQL & Databases", subtopics: ["MySQL & PostgreSQL Basics", "MongoDB Basics", "Joins & Subqueries"] },
+                    { name: "JDBC", subtopics: ["Drivers & Connections", "Statements & PreparedStatements", "ResultSets & Transactions"] },
+                    { name: "Java EE Core", subtopics: ["Servlet Lifecycle", "JSP & JSTL", "Design Patterns (MVC, DAO, Singleton, Factory)", "Java Mail API"] },
+                    { name: "Distributed Programming", subtopics: ["RMI", "Intro to Web Services (SOAP vs REST)"] }
+                ]
+            },
+            {
+                category: "Spring & Hibernate",
+                topics: [
+                    { name: "Hibernate (ORM)", subtopics: ["Architecture & Configuration", "Entity Mapping", "Relationships (1:1, 1:N, N:N)", "HQL & Criteria API", "Caching (L1, L2)"] },
+                    { name: "Spring Core", subtopics: ["Inversion of Control (IoC) & DI", "Bean Lifecycle & Auto-wiring", "Spring AOP", "Spring JDBC"] },
+                    { name: "Spring Boot", subtopics: ["Auto-configuration", "Spring Data JPA", "Spring Boot Web (MVC)", "Building REST APIs", "Exception Handling", "Spring Security & JWT"] },
+                    { name: "Microservices & AI", subtopics: ["Microservices Architecture", "Spring AI"] }
+                ]
+            },
+            {
+                category: "Deployment & DevOps",
+                topics: [
+                    { name: "Version Control", subtopics: ["Git Basics (Commit, Push, Pull, Branch)", "GitHub / GitLab", "Resolving Merge Conflicts"] },
+                    { name: "Build Tools", subtopics: ["Maven (pom.xml, lifecycles)", "Gradle (Basics)"] },
+                    { name: "Containerization", subtopics: ["Docker Basics", "Writing Dockerfiles", "Docker Compose"] },
+                    { name: "CI/CD & Servers", subtopics: ["GitHub Actions", "Jenkins Basics", "Apache Tomcat", "Nginx Proxying"] },
+                    { name: "Cloud Platforms", subtopics: ["AWS Basics (EC2, S3, RDS)", "Deploying Backend (Render / Heroku / AWS)", "Deploying Frontend (Vercel / Netlify)"] }
+                ]
+            }
+        ];
+
+        // Using a new state key because the data structure changed dramatically
+        const stateKey = 'javaTrackerStateV2';
+        let progressState = JSON.parse(localStorage.getItem(stateKey)) || {};
+
+        const container = document.getElementById('syllabus-container');
+        
+        function render() {
+            container.innerHTML = '';
+            
+            let totalSubtopics = 0;
+            let totalCompleted = 0;
+
+            syllabusData.forEach((section, sectionIndex) => {
+                let sectionCompleted = 0;
+                let sectionTotal = 0;
+                
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'chapter-card bg-slate-800 rounded-xl p-6 md:p-8 border border-slate-700';
+                
+                const titleContainer = document.createElement('div');
+                titleContainer.className = 'flex justify-between items-center mb-6';
+                
+                const title = document.createElement('h2');
+                title.className = 'text-2xl md:text-3xl font-bold text-white tracking-tight';
+                title.textContent = section.category;
+                
+                const sectionProgressText = document.createElement('span');
+                sectionProgressText.className = 'text-sm font-bold text-indigo-400 bg-indigo-900/40 px-3 py-1 rounded-full border border-indigo-800/50 shadow-sm';
+                sectionProgressText.id = `progress-text-${sectionIndex}`;
+                
+                titleContainer.appendChild(title);
+                titleContainer.appendChild(sectionProgressText);
+                
+                const progressBarContainer = document.createElement('div');
+                progressBarContainer.className = 'w-full bg-slate-900 rounded-full h-2.5 mb-8 overflow-hidden shadow-inner border border-slate-700/50';
+                
+                const progressBar = document.createElement('div');
+                progressBar.className = 'bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all duration-500 ease-out';
+                progressBar.id = `progress-bar-${sectionIndex}`;
+                
+                progressBarContainer.appendChild(progressBar);
+                
+                sectionDiv.appendChild(titleContainer);
+                sectionDiv.appendChild(progressBarContainer);
+                
+                const topicsContainer = document.createElement('div');
+                topicsContainer.className = 'space-y-8';
+                
+                section.topics.forEach((topic, topicIndex) => {
+                    const topicDiv = document.createElement('div');
+                    
+                    const topicTitle = document.createElement('h3');
+                    topicTitle.className = 'text-lg font-semibold text-slate-300 mb-4 pb-2 border-b border-slate-700/50 flex items-center gap-2';
+                    topicTitle.innerHTML = `<span class="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span> ${topic.name}`;
+                    topicDiv.appendChild(topicTitle);
+
+                    const subtopicsList = document.createElement('div');
+                    subtopicsList.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3 pl-2 sm:pl-4';
+
+                    topic.subtopics.forEach((sub, subIndex) => {
+                        sectionTotal++;
+                        totalSubtopics++;
+                        
+                        const id = `sec-${sectionIndex}-top-${topicIndex}-sub-${subIndex}`;
+                        const isChecked = progressState[id] || false;
+                        
+                        if (isChecked) {
+                            sectionCompleted++;
+                            totalCompleted++;
+                        }
+                        
+                        const label = document.createElement('label');
+                        label.className = 'group flex items-start space-x-3 cursor-pointer p-2.5 rounded-lg hover:bg-slate-700/40 border border-transparent hover:border-slate-600/50 transition-all duration-200';
+                        label.htmlFor = id;
+                        
+                        const input = document.createElement('input');
+                        input.type = 'checkbox';
+                        input.id = id;
+                        input.className = 'peer sr-only checkbox-custom';
+                        input.checked = isChecked;
+                        
+                        input.addEventListener('change', (e) => {
+                            progressState[id] = e.target.checked;
+                            localStorage.setItem(stateKey, JSON.stringify(progressState));
+                            updateProgress();
+                        });
+                        
+                        const customCheckbox = document.createElement('div');
+                        customCheckbox.className = 'w-5 h-5 mt-0.5 border-2 border-slate-500 bg-slate-800/80 rounded flex-shrink-0 flex items-center justify-center transition-colors duration-200 group-hover:border-blue-400 shadow-sm';
+                        customCheckbox.innerHTML = `<svg class="hidden w-3 h-3 text-white fill-current" viewBox="0 0 20 20"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>`;
+                        
+                        const textSpan = document.createElement('span');
+                        textSpan.className = `text-slate-300 text-sm leading-snug peer-checked:text-slate-500 peer-checked:line-through transition-all duration-200 ${isChecked ? 'text-slate-500 line-through' : ''}`;
+                        textSpan.textContent = sub;
+
+                        input.addEventListener('change', (e) => {
+                             if(e.target.checked) {
+                                 textSpan.classList.add('text-slate-500', 'line-through');
+                                 textSpan.classList.remove('text-slate-300');
+                             } else {
+                                 textSpan.classList.remove('text-slate-500', 'line-through');
+                                 textSpan.classList.add('text-slate-300');
+                             }
+                        });
+                        
+                        label.appendChild(input);
+                        label.appendChild(customCheckbox);
+                        label.appendChild(textSpan);
+                        
+                        subtopicsList.appendChild(label);
+                    });
+
+                    topicDiv.appendChild(subtopicsList);
+                    topicsContainer.appendChild(topicDiv);
+                });
+                
+                sectionDiv.appendChild(topicsContainer);
+                container.appendChild(sectionDiv);
+                
+                const sectionPercentage = sectionTotal > 0 ? Math.round((sectionCompleted / sectionTotal) * 100) : 0;
+                document.getElementById(`progress-text-${sectionIndex}`).textContent = `${sectionPercentage}%`;
+                document.getElementById(`progress-bar-${sectionIndex}`).style.width = `${sectionPercentage}%`;
+            });
+            
+            const overallPercentage = totalSubtopics > 0 ? Math.round((totalCompleted / totalSubtopics) * 100) : 0;
+            document.getElementById('overall-percentage').textContent = `${overallPercentage}%`;
+            document.getElementById('overall-progress-bar').style.width = `${overallPercentage}%`;
+        }
+        
+        function updateProgress() {
+            let totalSubtopics = 0;
+            let totalCompleted = 0;
+            
+            syllabusData.forEach((section, sectionIndex) => {
+                let sectionCompleted = 0;
+                let sectionTotal = 0;
+                
+                section.topics.forEach((topic, topicIndex) => {
+                    topic.subtopics.forEach((sub, subIndex) => {
+                        sectionTotal++;
+                        totalSubtopics++;
+                        const id = `sec-${sectionIndex}-top-${topicIndex}-sub-${subIndex}`;
+                        if (progressState[id]) {
+                            sectionCompleted++;
+                            totalCompleted++;
+                        }
+                    });
+                });
+                
+                const sectionPercentage = sectionTotal > 0 ? Math.round((sectionCompleted / sectionTotal) * 100) : 0;
+                document.getElementById(`progress-text-${sectionIndex}`).textContent = `${sectionPercentage}%`;
+                document.getElementById(`progress-bar-${sectionIndex}`).style.width = `${sectionPercentage}%`;
+            });
+            
+            const overallPercentage = totalSubtopics > 0 ? Math.round((totalCompleted / totalSubtopics) * 100) : 0;
+            document.getElementById('overall-percentage').textContent = `${overallPercentage}%`;
+            document.getElementById('overall-progress-bar').style.width = `${overallPercentage}%`;
+        }
+
+        function resetProgress() {
+            if(confirm("Are you sure you want to reset all your progress? This cannot be undone.")) {
+                progressState = {};
+                localStorage.removeItem(stateKey);
+                render();
+            }
+        }
+
+        render();
+    </script>
+</body>
+</html>
